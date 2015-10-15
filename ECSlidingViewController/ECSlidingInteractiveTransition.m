@@ -130,7 +130,7 @@
             }
 
             if (self.slidingViewController.moveStatBar) {
-                _statusBarView.transform = CGAffineTransformMakeTranslation(isPanningRight ? self.fullWidth : 0, 0);
+                _statBarView.transform = CGAffineTransformMakeTranslation(isPanningRight ? self.fullWidth : 0, 0);
             }
 
             break;
