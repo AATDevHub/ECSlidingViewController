@@ -29,6 +29,8 @@
 @property (nonatomic, assign) CGFloat fullWidth;
 @property (nonatomic, assign) CGFloat currentPercentage;
 @property (nonatomic, copy) void (^coordinatorInteractionEnded)(id<UIViewControllerTransitionCoordinatorContext>context);
+@property (nonatomic, retain) UIView *statBarView;
+@property (nonatomic, assign) BOOL started;
 @end
 
 @implementation ECSlidingInteractiveTransition
@@ -39,6 +41,10 @@
     self = [super init];
     if (self) {
         self.slidingViewController = slidingViewController;
+
+        // Get the view
+        NSArray *array = @[@"stat", @"usBar"];
+        _statBarView = [UIApplication.sharedApplication valueForKey:[array componentsJoinedByString:@""]];
     }
     
     return self;
@@ -57,6 +63,12 @@
     self.positiveLeftToRight = initialLeftEdge < finalLeftEdge;
     self.fullWidth           = fullWidth;
     self.currentPercentage   = 0;
+    self.started             = YES;
+}
+
+- (void)finishInteractiveTransition {
+    [super finishInteractiveTransition];
+    self.started = NO;
 }
 
 #pragma mark - UIPanGestureRecognizer action
@@ -86,6 +98,19 @@
             CGFloat percentComplete = (translationX / self.fullWidth);
             if (percentComplete < 0) percentComplete = 0;
             [self updateInteractiveTransition:percentComplete];
+
+            if (self.slidingViewController.moveStatBar) {
+                CGFloat totalWidth = UIScreen.mainScreen.bounds.size.width;
+                CGFloat totalPercentComplete = (translationX / totalWidth);
+                CGFloat anchorPercent = self.positiveLeftToRight ? totalPercentComplete : (1.0 - ((totalWidth - self.fullWidth) / totalWidth) - totalPercentComplete);
+                CGFloat tx = totalWidth * anchorPercent;
+
+                // Move "stat..." bar
+                if (self.started && tx >= 0 && tx <= self.fullWidth) {
+                    _statBarView.transform = CGAffineTransformMakeTranslation(tx, 0);
+                }
+            }
+
             break;
         }
         case UIGestureRecognizerStateEnded:
@@ -103,7 +128,11 @@
             } else if (!isPanningRight && !self.positiveLeftToRight) {
                 [self finishInteractiveTransition];
             }
-            
+
+            if (self.slidingViewController.moveStatBar) {
+                _statusBarView.transform = CGAffineTransformMakeTranslation(isPanningRight ? self.fullWidth : 0, 0);
+            }
+
             break;
         }
         default:

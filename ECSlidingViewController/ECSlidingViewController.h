@@ -303,4 +303,9 @@
  */
 @property (nonatomic, assign) NSTimeInterval defaultTransitionDuration;
 
+/**
+ Specify if the status bar needs to be moved as well. The 'Stat' in the name means 'Status'
+ */
+@property (nonatomic, assign) BOOL moveStatBar;
+
 @end

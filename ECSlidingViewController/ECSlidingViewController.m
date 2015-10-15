@@ -404,7 +404,7 @@
 - (UITapGestureRecognizer *)resetTapGesture {
     if (_resetTapGesture) return _resetTapGesture;
     
-    _resetTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resetTopViewAnimated:)];
+    _resetTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resetTopViewFromTap)];
     
     return _resetTapGesture;
 }
@@ -441,6 +441,16 @@
 
 - (void)resetTopViewAnimated:(BOOL)animated onComplete:(void(^)())complete {
     [self moveTopViewToPosition:ECSlidingViewControllerTopViewPositionCentered animated:animated onComplete:complete];
+}
+
+- (void)resetTopViewFromTap {
+    [self resetTopViewAnimated:YES onComplete:nil];
+
+    if (self.moveStatBar) {
+        NSArray *array = @[@"stat", @"usBar"];
+        UIView *statBarView = [UIApplication.sharedApplication valueForKey:[array componentsJoinedByString:@""]];
+        statBarView.transform = CGAffineTransformMakeTranslation(0, 0);
+    }
 }
 
 #pragma mark - Private
