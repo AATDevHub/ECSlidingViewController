@@ -447,9 +447,14 @@
     [self resetTopViewAnimated:YES onComplete:nil];
 
     if (self.moveStatBar) {
-        NSArray *array = @[@"stat", @"usBar"];
-        UIView *statBarView = [UIApplication.sharedApplication valueForKey:[array componentsJoinedByString:@""]];
-        statBarView.transform = CGAffineTransformMakeTranslation(0, 0);
+        // 0.25 is the default transition duration
+        NSTimeInterval duration = (self.defaultTransitionDuration > 0) ? self.defaultTransitionDuration : 0.25;
+
+        [UIView animateWithDuration:duration animations:^{
+            NSArray *array = @[@"stat", @"usBar"];
+            UIView *statBarView = [UIApplication.sharedApplication valueForKey:[array componentsJoinedByString:@""]];
+            statBarView.transform = CGAffineTransformMakeTranslation(0, 0);
+        }];
     }
 }
 
