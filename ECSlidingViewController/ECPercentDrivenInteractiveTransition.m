@@ -60,6 +60,7 @@
     CFTimeInterval pausedTime = [self.animationController transitionDuration:self.transitionContext] * _percentComplete;
     layer.speed = 0.0;
     layer.timeOffset = pausedTime;
+    layer.beginTime = 0.0;
 }
 
 - (void)cancelInteractiveTransition {
@@ -84,6 +85,12 @@
     layer.beginTime = 0.0;
     CFTimeInterval timeSincePause = [layer convertTime:CACurrentMediaTime() fromLayer:nil] - pausedTime;
     layer.beginTime = timeSincePause;
+    
+    // Reset the begin time after animation completes
+    NSTimeInterval duration = [self.animationController transitionDuration:self.transitionContext];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, duration * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        layer.beginTime = 0.0;
+    });
 }
 
 #pragma mark - CADisplayLink action
@@ -100,9 +107,13 @@
     
     [self updateInteractiveTransition:self.percentComplete];
     
+    CALayer *layer = [self.transitionContext containerView].layer;
+    
+    layer.timeOffset = 0.0;
+    layer.beginTime = 0.0;
+    
     if (_percentComplete == 0.0) {
         self.isActive = NO;
-        CALayer *layer = [self.transitionContext containerView].layer;
         [layer removeAllAnimations];
         layer.speed = 1.0;
     }
