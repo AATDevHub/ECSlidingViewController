@@ -30,7 +30,6 @@
 @property (nonatomic, assign) CGFloat currentPercentage;
 @property (nonatomic, copy) void (^coordinatorInteractionEnded)(id<UIViewControllerTransitionCoordinatorContext>context);
 @property (nonatomic, retain) UIView *statBarView;
-@property (nonatomic, assign) BOOL started;
 @end
 
 @implementation ECSlidingInteractiveTransition
@@ -63,12 +62,6 @@
     self.positiveLeftToRight = initialLeftEdge < finalLeftEdge;
     self.fullWidth           = fullWidth;
     self.currentPercentage   = 0;
-    self.started             = YES;
-}
-
-- (void)finishInteractiveTransition {
-    [super finishInteractiveTransition];
-    self.started = NO;
 }
 
 #pragma mark - UIPanGestureRecognizer action
@@ -106,7 +99,7 @@
                 CGFloat tx = totalWidth * anchorPercent;
 
                 // Move "stat..." bar
-                if (self.started && tx >= 0 && tx <= self.fullWidth) {
+                if (self.isActive && tx >= 0 && tx <= self.fullWidth) {
                     _statBarView.transform = CGAffineTransformMakeTranslation(tx, 0);
                 }
             }
@@ -116,6 +109,10 @@
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled: {
             BOOL isPanningRight = velocityX > 0;
+            
+            if (self.slidingViewController.moveStatBar && self.isActive) {
+                _statBarView.transform = CGAffineTransformMakeTranslation(isPanningRight ? self.fullWidth : 0, 0);
+            }
             
             if (self.coordinatorInteractionEnded) self.coordinatorInteractionEnded((id<UIViewControllerTransitionCoordinatorContext>)self.slidingViewController);
             
@@ -127,10 +124,6 @@
                 [self cancelInteractiveTransition];
             } else if (!isPanningRight && !self.positiveLeftToRight) {
                 [self finishInteractiveTransition];
-            }
-
-            if (self.slidingViewController.moveStatBar) {
-                _statBarView.transform = CGAffineTransformMakeTranslation(isPanningRight ? self.fullWidth : 0, 0);
             }
 
             break;

@@ -46,6 +46,11 @@
 @property (nonatomic, assign, readonly) CGFloat percentComplete;
 
 /**
+ Specifies whether the transition is in progress
+ */
+@property (nonatomic, assign, readonly) BOOL isActive;
+
+/**
  Updates the completion percentage of the transition. In general terms, this method is used to "scrub the playhead" of the animation defined by the `animationController`.
  
  While tracking user events, your code should call this method regularly to update the current progress toward completing the transition. If, during tracking, the interactions cross a threshold that you consider signifies the completion or cancellation of the transition, stop tracking events and call the finishInteractiveTransition or cancelInteractiveTransition method.
